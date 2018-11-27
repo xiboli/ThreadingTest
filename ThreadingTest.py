@@ -8,42 +8,42 @@ full_flg = np.zeros((queue_num, 1))
 rdwr_lock = threading.Lock()
 
 
-def dat():
+def data_read():
     wr_pos = 0
-    for i in range(7):
+    for i in range(10):
             # 1. Waiting
             while True:
                 rdwr_lock.acquire()
                 if full_flg[wr_pos] == 1:
                     rdwr_lock.release()
-                    print("run waiting loop")
+                    print("run main function loop")
                     time.sleep(1)
                     continue
                 rdwr_lock.release()
-                print("run waiting and break")
+                print("begin to read data")
                 break
             # 2. Reading data
-            print("run dat function %d" %i)
+            print("read data in %d position" %i)
             # 3. Update flags
             rdwr_lock.acquire()
             full_flg[wr_pos] = 1
             rdwr_lock.release()
-            print("run update flags in dat")
+            print("run update flags in data_read function")
             wr_pos = (wr_pos + 1) % queue_num
 
 
-wr_thread = threading.Thread(target=dat)
+wr_thread = threading.Thread(target=data_read)
 wr_thread.start()
-
+print('first threading')
 for i in range(100):
         # 1. Read data for each batch
         while True:
             rdwr_lock.acquire()
             if full_flg[rd_pos] == 0:
                 rdwr_lock.release()
-                print("lock acquire %d times before sleep" % j)
+                print("jump to read_data function %d times" % j)
                 time.sleep(1)
-                print("lock acquire %d times after sleep" %j)
+                print("jump out read_data function %d times" %j)
                 j = j + 1
                 continue
             rdwr_lock.release()
@@ -54,7 +54,7 @@ for i in range(100):
         # 3. Update flags
         rdwr_lock.acquire()
         full_flg[rd_pos] = 0
-        print("run update flags")
+        print("run update flags in main function %d times" % i)
         rdwr_lock.release()
         rd_pos = (rd_pos + 1) % queue_num
 
